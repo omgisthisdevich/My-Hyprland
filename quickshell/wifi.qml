@@ -18,17 +18,14 @@ PanelWindow {
 
 
 
-  function stringToArray(string){
-  	return string.trim().split(/\s+/)
-  }
-  
+    
   Process{
 	running: true
-	command: ["bash", "-c", `nmcli -f IN-USE,SSID,RATE,SIGNAL device wifi list | awk '$1 != "--"'`]
+	command: ["bash", "-c", ` tail -n +2 <<< $(nmcli -f IN-USE,SSID,RATE,SIGNAL device wifi list | awk '$1 != "--"')`]
 	stdout: StdioCollector{
 		onStreamFinished: {
-//			console.log(stringToArray(this.text))
-			wifiData=stringToArray(this.text) 
+			//console.log(stringToLines(this.text))
+			wifiData=stringToLines(this.text) 
 		}
 	}
   }	
@@ -43,26 +40,33 @@ PanelWindow {
 
 	}
 
-	model: 20
+	model: wifiData.length/4 
         delegate: Item {
             width: wifiListView.width
             height: childrenRect.height
 
-            Column {
-                Rectangle {
+	    Column {
+
+                Row{
                     width: wifiListView.width
                     height: 40
-                    color: "gray"
+		    //color: "gray"
+		    spacing: 2
 
-                    Text {
-                        anchors.centerIn: parent
-                        text: wifiData[4] 
-                    }
+		    Text {
+			    text: lineToArray(wifiData[index]).toString()
+		    }
                 }
-
-                //Text { text: "Subtitle " + modelData }
             }
-        }
+    	}
   }
+  function stringToLines(string){
+	  return string.split('\n')
+  }
+  function lineToArray(string){
+	  console.log(string.trim().split(/\s+/))
+	  return string.trim().split(/\s+/); 
+  }	
+
 }
 
