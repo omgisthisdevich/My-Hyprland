@@ -13,7 +13,7 @@ PanelWindow {
         // left: true
     }
 
-  implicitWidth: 300
+  implicitWidth: 400
   implicitHeight: 300 
 
 
@@ -21,7 +21,7 @@ PanelWindow {
     
   Process{
 	running: true
-	command: ["bash", "-c", ` tail -n +2 <<< $(nmcli -f IN-USE,SSID,RATE,SIGNAL device wifi list | awk '$1 != "--"')`]
+	command: ["bash", "-c", `nmcli -t -f IN-USE,SSID,RATE,SIGNAL dev wifi | grep -v '::' `]
 	stdout: StdioCollector{
 		onStreamFinished: {
 			//console.log(stringToLines(this.text))
@@ -40,33 +40,53 @@ PanelWindow {
 
 	}
 
-	model: wifiData.length/4 
+	model: wifiData.length 
         delegate: Item {
             width: wifiListView.width
             height: childrenRect.height
 
+	    MouseArea{
+		    anchors.fill: parent
+		    onClicked: {
+		    	connectCMD.running=true	    
+		    }
+	    }
+	    Process{
+		    id: connectCMD
+		    running: false
+		    command: ['bash', '-c',  `echo wifi clicked`]
+		    stdout: StdioCollector{
+			    onStreamFinished: {
+				    console.log('Button clicked')
+			    }
+		    }
+
+	    }
+
 	    Column {
 
-                Row{
+                Rectangle{
                     width: wifiListView.width
                     height: 40
-		    //color: "gray"
-		    spacing: 2
-
-		    Text {
-			    text: lineToArray(wifiData[index]).toString()
+		    WifiEntry{
+			    id: entry
+			    wifiEntry: lineToArray(wifiData[index])		    
 		    }
                 }
             }
     	}
   }
   function stringToLines(string){
+	 // console.log(string.split('\n').length)
+ 
 	  return string.split('\n')
   }
   function lineToArray(string){
-	  console.log(string.trim().split(/\s+/))
-	  return string.trim().split(/\s+/); 
+	  console.log(string.split(':'))
+	  return string.split(':'); 
   }	
 
 }
+
+
 
