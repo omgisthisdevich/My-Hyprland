@@ -21,7 +21,7 @@ PanelWindow {
     
   Process{
 	running: true
-	command: ["bash", "-c", `nmcli -t -f IN-USE,SSID,RATE,SIGNAL dev wifi | grep -v '::' `]
+	command: ["bash", "-c", `iwctl station wlan0 get-networks | sed 's/\x1b\[[0-9;]*m//g' | tail -n +5`]
 	stdout: StdioCollector{
 		onStreamFinished: {
 			//console.log(stringToLines(this.text))
@@ -70,21 +70,17 @@ PanelWindow {
                     height: 40
 		    WifiEntry{
 			    id: entry
-			    wifiEntry: lineToArray(wifiData[index])		    
+			    wifiRow: wifiData[index]
 		    }
                 }
             }
     	}
   }
   function stringToLines(string){
-	 // console.log(string.split('\n').length)
- 
+	  console.log(string.split('\n').length)
+
 	  return string.split('\n')
   }
-  function lineToArray(string){
-	  console.log(string.split(':'))
-	  return string.split(':'); 
-  }	
 
 }
 
